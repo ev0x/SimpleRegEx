@@ -3,50 +3,39 @@ import sys
 
 for line in sys.stdin:
     l = line.split()
-    lLen = len(l)
-    co = 0
     theList = []
     for i in l:
         iLen = len(i)
 	if i.isalpha():
-	    if co is 0:
-	        theList.append('^[a-zA-Z]{' + str(iLen) + '}')
-            elif co is lLen - 1:
-                theList.append('[a-zA-Z]{' + str(iLen) + '}$')
-            else:
-                theList.append('[a-sA-Z]{' + str(iLen) + '}')
-            co += 1
+            theList.append('[a-sA-Z]{' + str(iLen) + '}')
         elif i.isdigit():
-            if co is 0:
-                theList.append('^[0-9]{' + str(iLen) + '}')
-            elif co is lLen - 1:
-                theList.append('[0-9]{' + str(iLen) + '}$')
-            else:
-                theList.append('[0-9]{' + str(iLen) + '}')
-            co += 1
+            theList.append('[0-9]{' + str(iLen) + '}')
         else:
             innerList = []
-	    innerco = 0
-            innerlLen = len(i)
+            innerLast = None
+            innerCount = 1
             for s in i:
 		if s.isalpha():
-                    if innerco is 0 and co is 0: 
-                        innerList.append('^[a-zA-Z]')
-                    elif innerco is innerlLen - 1 and co is lLen - 1:
-                        innerList.append('[a-zA-Z]$')
+                    if innerLast is 'A':
+                        innerCount += 1
+                        innerList.pop() #remove the last item from the list
+                        innerList.append('[a-zA-Z]{' + str(innerCount) + '}')
                     else:
+                        innerCount = 1
                         innerList.append('[a-zA-Z]')
+                    innerLast = 'A'
 	        elif s.isdigit():
-                    if innerco is 0 and co is 0:
-                        innerList.append('^[0-9]')
-                    elif innerco is innerlLen - 1 and co is lLen - 1:
-                        innerList.append('[0-9]$')
+                    if innerLast is '1':
+                        innerCount += 1
+                        innerList.pop() #remove the last item from the list
+                        innerList.append('[0-9]{' + str(innerCount) + '}')
                     else:
+                        innerCount = 1
                         innerList.append('[0-9]')
-                innerco += 1
-            co += 1
+                    innerLast = '1'
 
             theList.append(''.join(innerList))
 
-    print '\s'.join(theList)
+    theRegEx = '\s'.join(theList)
+    print "^%s$" %theRegEx
     print line
